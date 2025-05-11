@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>算法移植结果验证分析组件（应用级验证）</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+
+        .container {
+            display: flex;
+            align-items: flex-start;
+            width: 1200px;
+            margin: 0 auto;
+            gap: 20px;
+        }
+
+        .left-panel, .right-panel {
+            background: #f7f9fa;
+            border-radius: 8px;
+            box-sizing: border-box;
+            padding: 20px 16px 20px 16px;
+        }
+
+        .left-panel {
+            width: 400px;
+            min-width: 350px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            height: 630px;
+        }
+
+        .right-panel {
+            min-width: 0;
+            width: 700px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title, .result-box-title {
+            background: #3498db;
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 4px 4px 0 0;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 0;
+        }
+
+        .results-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .result-box {
+            flex: 1;
+            background: #fff;
+            border-radius: 0 0 4px 4px;
+            min-height: 200px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 15px 10px;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+        }
+
+        .path-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .path-input input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .path-input button {
+            padding: 8px 16px;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            min-width: 80px;
+        }
+
+        .image-display {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f5f5f5;
+            overflow: auto;
+            padding: 10px;
+        }
+
+        #display-image {
+            max-width: calc(100% - 80px);
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .image-placeholder {
+            color: #999;
+            font-size: 16px;
+        }
+
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 18px;
+            border-radius: 4px;
+            transition: background 0.3s;
+            z-index: 1;
+        }
+
+        .nav-button:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .nav-button.prev {
+            left: 10px;
+        }
+
+        .nav-button.next {
+            right: 10px;
+        }
+
+        .result-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: auto;
+            padding: 10px;
+            margin: 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background: #f5f5f5;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .result-content::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .result-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .result-content::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .result-content::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .result-content.loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #4a90e2;
+        }
+
+        .result-image {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+            margin: 0 auto;
+            object-fit: contain;
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 12px;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        .submit-button:last-child {
+            margin-top: 10px;
+            background: #357abd;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        .title {
+            font-size: 24px;
+            color: #333;
+            margin: 0;
+        }
+
+        .logo {
+            height: 40px;
+            width: auto;
+        }
+
+        /* 修改特定任务选择的布局 */
+        .radio-group.task-group {
+            flex-direction: row;
+            justify-content: flex-start;
+            gap: 40px;
+        }
+        /* 结果区域的按钮样式 */
+        .result-buttons {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 10px;
+            padding: 0px 5px;
+        }
+
+        .result-button {
+            flex: 1;
+            background: #3498db;
+            color: white;
+            padding: 5px;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .result-button:hover {
+            background: #2980b9;
+        }
+        .results-preview {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    margin-top: 10px;
+    width: 100%;  /* 确保宽度不超过容器 */
+    overflow-x: auto;  /* 添加水平滚动条 */
+}
+
+.result-preview-box {
+    min-width: 120px;  /* 设置最小宽度 */
+    max-width: 180px;  /* 设置最大宽度 */
+    padding: 8px;
+    box-sizing: border-box;  /* 包含padding在宽度内 */
+}
+
+.preview-content {
+    width: 100%;  /* 宽度填满容器 */
+    min-height: 60px;
+    max-width: 100%;  /* 确保不超出父容器 */
+}
+
+/* 保留原有的悬停效果 */
+.result-preview-box:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+/* 保留原有的标签和内容样式 */
+.preview-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #3498db;
+    margin-bottom: 5px;
+}
+
+.result-preview-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    width: auto;
+    box-sizing: border-box;
+    padding: 8px 12px;
+}
+
+.preview-label {
+    flex-shrink: 0;
+    margin-right: 10px;
+}
+
+.preview-content {
+    flex-grow: 1;
+    width: auto;
+}
+
+.preview-label {
+    display: inline-block;  /* 改为行内块元素 */
+    vertical-align: middle;  /* 垂直居中 */
+    margin-right: 10px;  /* 添加右边距 */
+    font-size: 15px;
+    font-weight: 500;
+    color: #3498db;
+}
+
+.result-preview-box {
+    white-space: nowrap;  /* 防止换行 */
+    padding: 10px 10px;  /* 调整内边距 */
+}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="title">算法移植结果验证分析组件（应用级验证）</h1>
+        <img src="logo.png" alt="Logo" class="logo">
+    </div>
+
+    <div class="container">
+        <div class="left-panel">
+
+            <div class="section">
+                <div class="section-title">验证任务选择</div>
+                <div class="radio-group task-group">
+                    <label class="radio-label">
+                        <input type="radio" name="task" value="classification" checked>
+                        图像分类
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="task" value="detection">
+                        目标检测
+                    </label>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="path-input">
+                    <input type="text" id="model_path" readonly placeholder="算法路径：">
+                    <button onclick="selectFileOnly('model_path','onnx')">选择</button>
+                </div>
+                <div class="path-input">
+                    <input type="text" id="input_path" readonly placeholder="数据激励读取路径：">
+                    <button onclick="selectFileOnly('input_path',['jpg','jpeg','png'])">选择</button>
+                </div>
+                <div class="path-input">
+                    <input type="text" id="result_path" readonly placeholder="计算结果存储路径：">
+                    <button onclick="selectFolder()" id="folder-select-btn">选择文件夹</button>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-title">推理速度结果</div>
+                <div class="results-preview">
+                    <div class="result-preview-box">
+                        <div class="preview-label">
+                            <span>通用平台结果</span>
+                        </div>
+                        <textarea id="general-speed-result" class="preview-content" readonly></textarea>
+                    </div>
+                    <div class="result-preview-box">
+                        <div class="preview-label">
+                            <span>机载嵌入式智能平台结果</span>
+                        </div>
+                        <textarea id="embedded-speed-result" class="preview-content" readonly></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="result-buttons">
+                <button class="result-button" onclick="serverInference()">通用平台任务执行</button>
+                <button class="result-button" onclick="deviceInference()">机载嵌入式智能平台任务验证</button>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="section">
+                <div class="section-title" id="stimulus-display-title">激励数据显示（图像分类）：</div>
+                <div class="image-display">
+                    <button class="nav-button prev" onclick="navigateHistory('prev')" style="display: none;">◀</button>
+                    <img id="display-image" src="" alt="" style="display: none;">
+                    <div class="image-placeholder">请选择图片</div>
+                    <button class="nav-button next" onclick="navigateHistory('next')" style="display: none;">▶</button>
+                </div>
+            </div>
+            <div class="results-container">
+                <div class="result-box">
+                    <div class="result-box-title">通用平台结果</div>
+                    <div id="ground-result" class="result-content"></div>
+                </div>
+                <div class="result-box">
+                    <div class="result-box-title">机载嵌入式智能平台结果</div>
+                    <div id="ai-result" class="result-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="renderer.js"></script>
+</body>
+</html>

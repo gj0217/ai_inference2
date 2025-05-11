@@ -1,0 +1,16 @@
+{
+  "name": "model-converter",
+  "version": "1.0.0",
+  "description": "Model Converter UI",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "electron": "^13.6.9"
+  },
+  "devDependencies": {
+    "electron-builder": "^22.14.13"
+  }
+} 

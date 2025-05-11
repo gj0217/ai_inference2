@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>框架数据验证支持组件</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            height: calc(100vh - 40px); /* 减去body的padding */
+        }
+
+        .left-panel, .center-panel, .right-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .left-panel {
+            flex: 0 0 350px;
+        }
+
+        .center-panel, .right-panel {
+            flex: 1;
+            overflow: hidden; /* 防止内容溢出 */
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow-y: auto; /* 允许内容滚动 */
+            min-height: 0; /* 重要：允许flex子项收缩 */
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #666;
+        }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        input[type="radio"] {
+            margin-right: 8px;
+        }
+
+        button {
+            background-color: #1890ff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #40a9ff;
+        }
+
+        .file-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .file-input-group input[type="text"] {
+            flex: 1;
+        }
+
+        .file-input-group button {
+            flex-shrink: 0;
+            padding: 8px;
+            min-width: 40px;
+        }
+
+        #logOutput, #modelDisplay {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            padding: 10px;
+            box-sizing: border-box;
+            font-family: monospace;
+            white-space: pre-wrap;
+            background-color: #fafafa;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .empty-content {
+            color: #999;
+            font-size: 14px;
+            padding: 20px;
+        }
+
+        .form-section {
+            border: 1px solid #d0d5ff;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-section-title {
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+            min-width: 250px;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .config-item {
+            width: 100%;
+        }
+
+        .path-input {
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 1px solid #d0d5ff;
+            border-radius: 4px;
+            padding: 8px;
+            margin-bottom: 15px;
+            width: 95%; 
+            height: auto; /* 确保不纵向充满 */
+        }
+
+        .path-input-with-tip {
+            display: flex;
+            /* align-items: right; */
+            background: white;
+            padding: 1px;
+        }
+
+        .path-input input {
+            border: none;
+            background: transparent;
+            flex: 1;
+            padding: 0;
+            margin-right: 8px;
+        }
+
+        .path-input button {
+            padding: 4px 8px;
+            min-width: 24px;
+            font-size: 12px;
+        }
+
+        .analyze-btn {
+            width: 100%;
+            margin-top: 15px;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #4a69ff;
+        }
+
+        .analyze-btn:hover {
+            background-color: #3651ff;
+        }
+
+        #modelDisplay {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            padding: 10px;
+            box-sizing: border-box;
+            background-color: #fafafa;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        #modelDisplay img {
+            width: 100%;
+            height: auto;
+            display: block;
+            position: relative;
+            top: 0;
+            left: 0;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            margin-bottom: 24px;
+            background: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 12px;
+        }
+        .logo {
+            height: 40px;
+            width: auto;
+        }
+        #logOutput, #modelDisplay {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            padding: 10px;
+            box-sizing: border-box;
+            font-family: monospace;
+            white-space: pre-wrap;
+            background-color: #fafafa;
+        }
+        .result-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: auto;
+            padding: 10px;
+            margin: 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background: #f5f5f5;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .model-display {
+            border: 1px solid #e0e0e0;
+            min-height: 200px;
+            height: 300px; /* 固定高度 */
+            padding: 10px;
+            background-color: #fafafa;
+            border-radius: 8px;
+            transition: border-color 0.2s;
+        }
+        .model-display:hover {
+            border-color: #1976d2;
+        }
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        .button-group button {
+            flex: 1;
+            max-width: none; /* 移除最大宽度限制 */
+        }
+        .button-group button:first-child {
+            margin-left: 0;
+        }
+        .button-group button:last-child {
+            margin-right: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="title">框架数据验证支持组件</h1>
+        <img src="logo.png" alt="Logo" class="logo">
+    </div>
+    <div class="container">
+        <div class="left-panel">
+            <div class="form-section">
+                <div class="form-section-title">验证级别选择：</div>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="granularity" value="operator" checked>
+                        算子级
+                    </label>
+                    <label>
+                        <input type="radio" name="granularity" value="model">
+                        算法级
+                    </label>
+                </div>
+            </div>
+            <div class="path-input-with-tip">
+                <div class="path-input">
+                    <input type="text" id="model_path"  readonly placeholder="标准算法模型库路径：">
+                    <button onclick="selectFileOnly('model_path', 'onnx')">选择</button>
+                </div>
+                <div class="tooltip-container" style="position: relative; display: inline-block;">
+                    <span class="tooltip-icon" style="cursor: pointer; margin-top: 10px;margin-left: 8px; background-color: #1890ff; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; line-height: 20px; vertical-align: middle;">?</span>
+                    <div class="tooltip-text" style="display: none; position: absolute; background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 4px; width: 300px; z-index: 1; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        评估智能计算框架是通过评估具体模型/算法实现的，相关算法已在智能计算系统框架开发部署组件中被转化为不依赖于特定框架的模型形式。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="path-input">
+                <input type="text" id="gt_path" readonly placeholder="计算框架转换结果存储路径：">
+                <button onclick="selectFolder('gt_path')">选择</button>                
+            </div>
+            <div class="path-input">
+                <input type="text" id="input_path" readonly placeholder="数据激励读取路径：">
+                <button onclick="selectFileOnly('input_path','npy')">选择</button>                
+            </div>
+            <div class="path-input">
+                <input type="text" id="result_path" readonly placeholder="结果存储路径：">
+                <button onclick="selectFolder('result_path')">选择</button>                
+            </div>
+            <div class="path-input-with-tip">
+                <div class="path-input">
+                    <div style="display: flex; width: 100%;">
+                        <input type="text" id="evaluationTypeDisplay" readonly placeholder="评估类型" style="flex: 1; border-right: none; border-top-right-radius: 0; border-bottom-right-radius: 0;">
+                        <button onclick="toggleEvaluationTypeDropdown()" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">▼</button>
+                    </div>
+                    <div id="evaluationTypeDropdown" style="display: none; position: absolute; background: white; border: 1px solid #ddd; border-radius: 4px; z-index: 1; width: 100%; max-width: 300px;">
+                        <div style="padding: 8px; cursor: pointer;" onclick="selectEvaluationType('consine')">consine</div>
+                        <div style="padding: 8px; cursor: pointer;" onclick="selectEvaluationType('l1')">L1</div>
+                        <div style="padding: 8px; cursor: pointer;" onclick="selectEvaluationType('l2')">L2</div>
+                    </div>
+                </div>
+                <div class="tooltip-container" style="position: relative; display: inline-block;">
+                    <span class="tooltip-icon" style="cursor: pointer; margin-top: 10px;margin-left: 8px; background-color: #1890ff; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; line-height: 20px; vertical-align: middle;">?</span>
+                    <div class="tooltip-text" style="display: none; position: absolute; background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 4px; width: 300px; z-index: 1; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        评估智能计算框架是通过评估具体模型/框架数据验证支持组件通过比较智能计算框架（特定模型）分别在地面高性能平台与机载AI芯片平台上计算结果的数值接近程度，来验证与评估智能框架的移植效果。具体的指标包括，向量余弦距离、向量L1距离、向量L2距离。
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <div class="button-group">
+                    <div style="display: flex; justify-content: center; margin-bottom: 12px;">
+                        <button onclick="supportList()" style="max-width: 300px;">算子支持清单</button>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; gap: 12px;">
+                        <button onclick="highInference()">标准算子验证</button>
+                        <button onclick="dataVerify()">机载算子验证</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="center-panel">
+            <h2 style="margin-bottom: 10px;">数据激励显示</h2>
+            <div class="panel-content" style="margin-bottom: 20px;">
+                <div id="dataDisplay" class="empty-content"></div>
+            </div>
+            <h2 style="margin-bottom: 10px;">标准算法模型库结果显示</h2>
+            <div class="panel-content" style="margin-bottom: 20px;">
+                <div id="highResultDisplay" class="empty-content"></div>
+            </div>
+            <h2 style="margin-bottom: 10px;">机载移植算法模型库结果显示</h2>
+            <div class="panel-content" style="margin-bottom: 20px;">
+                <div id="AIDisplay" class="empty-content"></div>
+            </div>
+            <h2 style="margin-bottom: 10px;">精度比对结果显示</h2>
+            <div class="panel-content" style="margin-bottom: 20px;">
+                <div id="compareDisplay" class="empty-content"></div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <h2>模型显示</h2>
+            <div class="panel-content">
+                <div id="model-display" class="empty-content"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // 添加tooltip显示逻辑
+        const tooltipIcons = document.querySelectorAll('.tooltip-icon');
+        tooltipIcons.forEach(tooltipIcon => {
+            const tooltipText = tooltipIcon.nextElementSibling;
+            tooltipIcon.addEventListener('mouseenter', () => {
+                tooltipText.style.display = 'block';
+            });
+            tooltipIcon.addEventListener('mouseleave', () => {
+                tooltipText.style.display = 'none';
+            });
+        });
+    </script>
+    <script src="script.js"></script>
+    
+</body>
+</html>

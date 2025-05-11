@@ -1,0 +1,24 @@
+{
+  "name": "electron-app",
+  "version": "1.0.0",
+  "description": "Model Converter UI",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "postinstall": "electron-builder install-app-deps",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "canvas": "^3.1.0",
+    "electron": "^25.3.1",
+    "express": "^5.1.0",
+    "rebuild": "^0.1.2"
+  },
+  "devDependencies": {
+    "electron": "^36.1.0",
+    "electron-builder": "^22.14.13"
+  },
+  "author": "",
+  "license": "ISC",
+  "keywords": []
+}

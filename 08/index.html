@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>智能计算系统框架开发部署组件</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            height: calc(100vh - 40px); /* 减去body的padding */
+        }
+
+        .left-panel, .center-panel, .right-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .left-panel {
+            flex: 0 0 300px;
+        }
+
+        .center-panel, .right-panel {
+            flex: 1;
+            overflow: hidden; /* 防止内容溢出 */
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow-y: auto; /* 允许内容滚动 */
+            min-height: 0; /* 重要：允许flex子项收缩 */
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #666;
+        }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        input[type="radio"] {
+            margin-right: 8px;
+        }
+
+        button {
+            background-color: #1890ff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #40a9ff;
+        }
+
+        .file-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .file-input-group input[type="text"] {
+            flex: 1;
+        }
+
+        .file-input-group button {
+            flex-shrink: 0;
+            padding: 8px;
+            min-width: 40px;
+        }
+
+        #logOutput, #modelDisplay {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            padding: 10px;
+            box-sizing: border-box;
+            font-family: monospace;
+            white-space: pre-wrap;
+            background-color: #fafafa;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .empty-content {
+            color: #999;
+            font-size: 14px;
+            padding: 20px;
+        }
+
+        .form-section {
+            border: 1px solid #d0d5ff;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-section-title {
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+            min-width: 250px;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .config-item {
+            width: 100%;
+        }
+
+        .path-input {
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 1px solid #d0d5ff;
+            border-radius: 4px;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+
+        .path-input input {
+            border: none;
+            background: transparent;
+            flex: 1;
+            padding: 0;
+            margin-right: 8px;
+        }
+
+        .path-input button {
+            padding: 4px 8px;
+            min-width: 24px;
+            font-size: 12px;
+        }
+
+        .analyze-btn {
+            width: 100%;
+            margin-top: 15px;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #4a69ff;
+        }
+
+        .analyze-btn:hover {
+            background-color: #3651ff;
+        }
+
+        #modelDisplay {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            padding: 10px;
+            box-sizing: border-box;
+            background-color: #fafafa;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        #modelDisplay img {
+            width: 100%;
+            height: auto;
+            display: block;
+            position: relative;
+            top: 0;
+            left: 0;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            margin-bottom: 24px;
+            background: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 12px;
+        }
+        .logo {
+            height: 40px;
+            width: auto;
+        }
+        #logOutput, #modelDisplay {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            padding: 10px;
+            box-sizing: border-box;
+            font-family: monospace;
+            white-space: pre-wrap;
+            background-color: #fafafa;
+        }
+        .result-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: auto;
+            padding: 10px;
+            margin: 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background: #f5f5f5;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .model-display {
+            border: 1px solid #e0e0e0;
+            min-height: 200px;
+            height: 300px; /* 固定高度 */
+            padding: 10px;
+            background-color: #fafafa;
+            border-radius: 8px;
+            transition: border-color 0.2s;
+        }
+        .model-display:hover {
+            border-color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="title">算法功能开发支持工具</h1>
+        <img src="logo.png" alt="Logo" class="logo">
+    </div>
+    <div class="container">
+        <div class="left-panel">
+            <div class="form-section">
+                <div class="form-section-title">机载AI芯片类型：</div>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="chipType" value="atlas" checked>
+                        昇腾Ascend310B
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="path-input">
+                    <div style="display: flex; width: 100%;">
+                        <input type="text" id="algorithmDisplay" readonly placeholder="算法功能选择" style="flex: 1; border-right: none; border-top-right-radius: 0; border-bottom-right-radius: 0;">
+                        <button onclick="toggleAlgorithmDropdown()" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">▼</button>
+                    </div>
+                    <div id="algorithmDropdown" style="display: none; position: absolute; background: white; border: 1px solid #ddd; border-radius: 4px; z-index: 1; width: 100%; max-width: 300px;">
+                        <div style="padding: 8px; cursor: pointer;" onclick="selectAlgorithm('classification')">图像分类</div>
+                        <div style="padding: 8px; cursor: pointer;" onclick="selectAlgorithm('detection')">目标检测</div>
+                        <div style="padding: 8px; cursor: pointer;" onclick="selectAlgorithm('control')">控制算法</div>
+                    </div>
+                </div>
+                <div class="path-input">
+                    <input type="text" id="model_path" accept=".onnx" readonly placeholder="算法路径：">
+                    <button onclick="selectFileOnly('model_path','onnx')">选择</button>                
+                </div>
+                <div class="path-input">
+                    <input type="text" id="exportPath" readonly placeholder="输出路径：">
+                    <button onclick="selectFolder()">选择文件夹</button>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="form-section-title">机载AI芯片配置：</div>
+                <div id="chip-config-area"></div>
+            </div>
+
+            <button class="analyze-btn" onclick="deployModel()">模型部署</button>
+        </div>
+
+        <div class="center-panel">
+            <h2>算法显示</h2>
+            <div class="panel-content">
+                <div id="model-display" class="empty-content">点击"模型解析"按钮查看模型结构图</div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <h2>信息log输出</h2>
+            <div class="panel-content">
+                <div id="logOutput" class="empty-content">点击"模型解析"按钮查看日志输出</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

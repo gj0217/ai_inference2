@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能模型解析系统</title>
+    <style>
+        :root {
+    --primary-color: #4A6FA5;   /* 蓝灰色主色 */
+    --secondary-color: #2E3A59; /* 深蓝黑 */
+    --accent-color: #6CD4C4;   /* 柔和薄荷绿 */
+    --light-color: #F5F8FA;    /* 浅灰蓝背景 */
+    --dark-color: #0A192F;     /* 深海蓝 */
+}
+        
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            background-color: #f0f5ff; /* 从#f5f7fa改为更蓝的浅色背景 */
+            color: var(--dark-color);
+        }
+        
+        .sidebar {
+            width: 240px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 30px 0;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-header {
+            padding: 0 30px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar-title::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 20px;
+            background-color: white;
+            margin-right: 10px;
+            border-radius: 4px;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            margin: 8px 20px;
+            padding: 12px 20px;
+            background-color: transparent;
+            color: rgba(255,255,255,0.95);  /* 从0.8改为0.95提高透明度 */
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            font-weight: 500;  /* 新增字体加粗 */
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);  /* 新增文字阴影增强可读性 */
+        }
+        
+        .nav-item:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .nav-item.active {
+            background-color: rgba(255,255,255,0.2);
+            color: white;
+            font-weight: 500;
+        }
+        
+        .content {
+            flex: 1;
+            padding: 30px;
+            overflow: auto;
+            background-color: white;
+            border-radius: 10px 0 0 0;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.05);
+            display: flex;          /* 新增 */
+            align-items: center;    /* 新增 */
+            justify-content: center; /* 新增 */
+        }
+        
+        .home-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            width: 100%;            /* 新增 */
+        }
+        
+        .logo {
+            max-width: 880px;  /* 从180px增大到280px */
+            margin-bottom: 30px;
+            filter: drop-shadow(0 5px 10px rgba(67, 97, 238, 0.2));
+            transition: transform 0.3s ease;  /* 添加悬停动画 */
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);  /* 悬停时轻微放大 */
+        }
+        
+        .welcome-title {
+            color: var(--primary-color);
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .welcome-subtitle {
+            color: var(--dark-color);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            opacity: 0.8;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .home-content {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        
+        .nav-item {
+            animation: fadeIn 0.4s ease-out forwards;
+            animation-delay: calc(var(--i) * 0.1s);
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1 class="sidebar-title">智能模型解析</h1>
+        </div>
+        <button data-page="home" class="nav-item" style="--i:0">🏠 系统主页</button>
+        <button data-page="07/index.html" class="nav-item" style="--i:1">🔧 7</button>
+        <button data-page="08/index.html" class="nav-item" style="--i:2">⚙️ 8</button>
+        <button data-page="09/index.html" class="nav-item" style="--i:3">🧠 9</button>
+        <button data-page="10/index.html" class="nav-item" style="--i:4">🚀 10</button>
+        <button data-page="11/index.html" class="nav-item" style="--i:5">📊 11</button>
+        <button data-page="12/index.html" class="nav-item" style="--i:6">⚡ 12</button>
+    </div>
+    <div class="content" id="mainContent">
+        <div class="home-content">
+            <img src="logo.png" alt="系统logo" class="logo">
+            <h1 class="welcome-title">欢迎使用智能模型解析系统</h1>
+            <p class="welcome-subtitle">
+                本系统支持多种深度学习框架模型的解析与可视化，<br>
+                请从左侧导航栏选择您需要的功能模块开始使用
+            </p>
+        </div>
+    </div>
+    <script>
+        document.querySelectorAll('.nav-item').forEach((link, index) => {
+            link.style.setProperty('--i', index);
+            
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                link.classList.add('active');
+                
+                const pagePath = link.getAttribute('data-page');
+                if(pagePath === 'home') {
+                    document.getElementById('mainContent').innerHTML = `
+                        <div class="home-content">
+                            <img src="logo.png" alt="系统logo" class="logo">
+                            <h1 class="welcome-title">欢迎使用智能模型解析系统</h1>
+                            <p class="welcome-subtitle">
+                                本系统支持多种深度学习框架模型的解析与可视化，<br>
+                                请从左侧导航栏选择您需要的功能模块开始使用
+                            </p>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('mainContent').innerHTML = `
+                        <iframe id="contentFrame" src="${pagePath}"></iframe>
+                    `;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+    "id": "4",
+    "func": "1",
+    "chipset": "ascend",
+    "model_path": "./exported/pytorch_resnet50.onnx",
+    "export_path": "./exported",
+    "input_path": "./data/raw_data/inputs/input1_img224.npy",
+    "result_path": "./data/raw_data/outputs",
+    "eval_type": "l1"
+}

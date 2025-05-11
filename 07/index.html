@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模型分析页面</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #2c3e50;
+        }
+        .container {
+            display: flex;
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .control-panel {
+            width: 320px;
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .display-panel {
+            flex: 1;
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .form-group {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input[type="text"]:focus, input[type="file"]:focus {
+            outline: none;
+            border-color: #1976d2;
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+        }
+        button {
+            background-color: #1976d2;
+            color: white;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 12px;
+            font-weight: 500;
+            font-size: 14px;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        button:hover {
+            background-color: #1565c0;
+            transform: translateY(-1px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .display-section {
+            margin-top: 24px;
+            margin-bottom: 10px;
+            height: 230px; /* 固定高度 */
+            width: 100%; /* 固定宽度 */
+            overflow: auto; /* 允许内容滑动 */
+            box-sizing: border-box; /* 确保 padding 不会影响容器大小 */
+            resize: none; /* 禁止用户调整大小 */
+        }
+        .algo-display-section {
+            margin-top: 24px;
+            margin-bottom: 10px;
+            height: 55%; /* 固定高度 */
+            width: 100%; /* 固定宽度 */
+            overflow: auto; /* 允许内容滑动 */
+            resize: none; /* 禁止用户调整大小 */
+        }
+        .display-title {
+            font-size: 16px;
+            margin-bottom: 16px;
+            margin-top: 10px;
+            color: #2c3e50;
+            font-weight: 600;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .model-display {
+            border: 1px solid #e0e0e0;
+            min-height: 200px;
+            height: 300px; /* 固定高度 */
+            padding: 10px;
+            background-color: #fafafa;
+            border-radius: 8px;
+            transition: border-color 0.2s;
+        }
+        .model-display:hover {
+            border-color: #1976d2;
+        }
+        .text-display {
+            border: 1px solid #e0e0e0;
+            height: 180px; /* 固定高度 */
+            width: 95%; /* 固定宽度 */
+            padding: 16px;
+            background-color: #fafafa;
+            white-space: pre-wrap;
+            overflow: auto; /* 允许内容滑动 */
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.6;
+            transition: border-color 0.2s;
+            box-sizing: border-box; /* 确保 padding 不会影响容器大小 */
+            resize: none; /* 禁止用户调整大小 */
+        }
+        .text-display:hover {
+            border-color: #1976d2;
+        }
+        .path-input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.2s;
+        }
+        .path-input-container:hover {
+            border-color: #1976d2;
+            background: #f0f7ff;
+        }
+        .path-input-container input {
+            padding: 10px 12px;
+            padding-right: 40px;
+            width: 100%;
+            height: 40px;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+        }
+        .path-input-container input:focus {
+            outline: none;
+            box-shadow: none;
+        }
+        .inline-button {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 0 16px;
+            height: 32px;
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .inline-button:hover {
+            background-color: #1565c0;
+            transform: translateY(-50%) translateY(-1px);
+        }
+        .inline-button:active {
+            transform: translateY(-50%) translateY(0);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            margin-bottom: 24px;
+            background: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 12px;
+        }
+        .logo {
+            height: 40px;
+            width: auto;
+        }
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0;
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        .button-group button {
+            flex: 1;
+            max-width: 200px;
+        }
+        .button-group button:first-child {
+            margin-left: 0;
+        }
+        .button-group button:last-child {
+            margin-right: 0;
+        }
+        .path-input {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .path-input input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #f8f9fa;
+            color: #2c3e50;
+            transition: all 0.2s;
+        }
+        .path-input input:focus {
+            outline: none;
+            border-color: #1976d2;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+        }
+        .path-input input::placeholder {
+            color: #9e9e9e;
+        }
+        .path-input button {
+            padding: 10px 20px;
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .path-input button:hover {
+            background-color: #1565c0;
+            transform: translateY(-1px);
+        }
+        .path-input button:active {
+            transform: translateY(0);
+        }
+        .result-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: auto;
+            padding: 10px;
+            margin: 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background: #f5f5f5;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="title">算法解析组件</h1>
+        <img src="logo.png" alt="Logo" class="logo">
+    </div>
+    <div class="container">
+        <div class="control-panel">
+            <div class="form-group">
+                <div class="path-input">
+                    <input type="text" id="model_path" readonly placeholder="算法路径：" value="./sys2/exported/resnet50.onnx">
+                    <button onclick="selectFileOnly('model_path','onnx')">选择</button>
+                </div>
+            </div>
+   
+                <div class="path-input">
+                    <input type="text" id="export_path" readonly placeholder="结果输出路径：" value="./exported/">
+                    <button onclick="selectFolder('export_path')">选择</button>
+                </div>
+
+            <div class="display-title">算法显示</div>
+            <div class="algo-display-section">
+                <div class="model-display">
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button onclick="parseModelFunction()">算法功能解析</button>
+                <button onclick="parseBasicOperations()">基础运算解析</button>
+            </div>
+        </div>
+        
+        <div class="display-panel">
+            <div class="display-title">算法功能显示</div>
+            <div class="display-section">
+                <div class="text-display" id="model-function-display"></div>
+            </div>
+            <div class="display-title">基础运算显示</div>
+            <div class="display-section">
+                <div class="text-display" id="basic-operations-display"></div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
