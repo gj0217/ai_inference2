@@ -142,6 +142,23 @@ window.deployModel = async function() {
         const savePath2 = await window.parent.electron.saveJson(config2, `page10_convert_${selectedFiles.algorithm}.json`);
         console.log('配置文件已保存到:', savePath2);
 
+        // 显示正在启动服务的提示
+        modelDisplay.innerHTML = `
+            <div style="padding: 20px; text-align: center;">
+                <h3>正在启动服务...</h3>
+                <p>请稍候，这可能需要几秒钟时间</p>
+                <div style="margin-top: 20px; display: flex; justify-content: center;">
+                    <div style="width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                </div>
+                <style>
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                </style>
+            </div>
+        `;
+
         // 启动服务
         const command0 = 'rm /home/lenovo/proj/demo/log.txt';
         await window.parent.electron.executeCommand(command0);

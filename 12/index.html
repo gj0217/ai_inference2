@@ -311,6 +311,90 @@
         }
         .button-group {
             display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        .button-group button {
+            flex: 1;
+            max-width: 200px;
+        }
+        .button-group button:first-child {
+            margin-left: 0;
+        }
+        .button-group button:last-child {
+            margin-right: 0;
+        }
+        .section-title, .result-box-title {
+            background: #3498db;
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 4px 4px 0 0;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 0;
+        }
+
+        .results-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .result-box {
+            flex: 1;
+            background: #fff;
+            border-radius: 0 0 4px 4px;
+            min-height: 200px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            display: flex;
+            flex-direction: column;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .result-preview-box {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;  /* 包含padding在宽度内 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            width: auto;
+            box-sizing: border-box;
+            padding: 8px 12px;
+        }
+        .results-preview {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+            width: 100%;  /* 确保宽度不超过容器 */
+            overflow-x: auto;  /* 添加水平滚动条 */
+            align-items: center;
+        }
+        .preview-content {
+            width: 100%;  /* 宽度填满容器 */
+            min-height: 60px;
+            max-width: 100%;  /* 确保不超出父容器 */
+        }
+        .preview-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 5px;
+            flex-shrink: 0;
+            margin-right: 10px;
+        }
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .button-group {
+            display: flex;
             flex-direction: column;
             gap: 12px;
             margin-top: 24px;
@@ -355,21 +439,31 @@
                 <div class="tooltip-container" style="position: relative; display: inline-block;">
                     <span class="tooltip-icon" style="cursor: pointer; margin-top: 10px;margin-left: 8px; background-color: #1890ff; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; line-height: 20px; vertical-align: middle;">?</span>
                     <div class="tooltip-text" style="display: none; position: absolute; background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 4px; width: 300px; z-index: 1; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                        评估智能计算框架是通过评估具体模型/算法实现的，相关算法已在智能计算系统框架开发部署组件中被转化为不依赖于特定框架的模型形式。
+                        <span id="operator-tip" style="display:none">待选择的标准算子模型库为常用的算子，该算子是从标准算法模型库中提取而来的，文件后缀名应为onnx。</span>
+                        <span id="model-tip" style="display:none">待选择的标准算法模型库为常用的算法，如ResNet50等标准骨干算法模型；该文件的后缀名应为onnx。</span>
                     </div>
                 </div>
             </div>
             
             <div class="path-input">
-                <input type="text" id="gt_path" readonly placeholder="计算框架转换结果存储路径：">
-                <button onclick="selectFolder('gt_path')">选择</button>                
+                <input type="text" id="export_path" readonly placeholder="机载移植算法模型库路径：">
+                <button onclick="selectFolder('export_path')">选择</button>                
+            </div>
+            <div class="path-input-with-tip">
+                <div class="path-input">
+                    <input type="text" id="input_path" readonly placeholder="数据激励读取路径：">
+                    <button onclick="handleInputPathSelection()">选择</button>                
+                </div>
+                <div class="tooltip-container" style="position: relative; display: inline-block;">
+                    <span class="tooltip-icon" style="cursor: pointer; margin-top: 10px;margin-left: 8px; background-color: #1890ff; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; line-height: 20px; vertical-align: middle;">?</span>
+                    <div class="tooltip-text" style="display: none; position: absolute; background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 4px; width: 300px; z-index: 1; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <span id="data-operator-tip" style="display:none">请选择含有算子输入的文件夹路径。</span>
+                        <span id="data-model-tip" style="display:none">请选择算法输入文件，文件后缀名应为npy。</span>
+                    </div>
+                </div>
             </div>
             <div class="path-input">
-                <input type="text" id="input_path" readonly placeholder="数据激励读取路径：">
-                <button onclick="selectFileOnly('input_path','npy')">选择</button>                
-            </div>
-            <div class="path-input">
-                <input type="text" id="result_path" readonly placeholder="结果存储路径：">
+                <input type="text" id="result_path" readonly placeholder="计算结果存储路径：">
                 <button onclick="selectFolder('result_path')">选择</button>                
             </div>
             <div class="path-input-with-tip">
@@ -387,20 +481,18 @@
                 <div class="tooltip-container" style="position: relative; display: inline-block;">
                     <span class="tooltip-icon" style="cursor: pointer; margin-top: 10px;margin-left: 8px; background-color: #1890ff; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; line-height: 20px; vertical-align: middle;">?</span>
                     <div class="tooltip-text" style="display: none; position: absolute; background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 4px; width: 300px; z-index: 1; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                        评估智能计算框架是通过评估具体模型/框架数据验证支持组件通过比较智能计算框架（特定模型）分别在地面高性能平台与机载AI芯片平台上计算结果的数值接近程度，来验证与评估智能框架的移植效果。具体的指标包括，向量余弦距离、向量L1距离、向量L2距离。
-                    </div>
+                        移植结果验证分析组件通过比较标准算法模型库/机载移植算法模型库在地面高性能通用平台与机载嵌入式智能平台上计算结果的数值接近程度，来验证与评估算子/算法库的移植效果。具体的指标包括，向量余弦距离、向量L1距离、向量L2距离                    </div>
                 </div>
             </div>
 
             <div class="button-group">
-                <div class="button-group">
-                    <div style="display: flex; justify-content: center; margin-bottom: 12px;">
-                        <button onclick="supportList()" style="max-width: 300px;">算子支持清单</button>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; gap: 12px;">
-                        <button onclick="highInference()">标准算子验证</button>
-                        <button onclick="dataVerify()">机载算子验证</button>
-                    </div>
+                <div style="display: flex; justify-content: center; margin-bottom: 12px;">
+                    <button id="supportButton" onclick="supportList()" style="max-width: 300px;">算子支持清单</button>
+                    <button id="playButton" onclick="playVideo()" style="display: block; margin-left: 10px; padding: 4px 8px; min-width: 24px; font-size: 12px;">算子一键测试</button>
+                </div>
+                <div style="display: flex; justify-content: space-between; gap: 12px;">
+                    <button id="verifyNormalButton" onclick="AIInference()">标准算子验证</button>
+                    <button id="verifyAIButton" onclick="dataVerify()">机载算子验证</button>
                 </div>
             </div>
         </div>
@@ -410,15 +502,31 @@
             <div class="panel-content" style="margin-bottom: 20px;">
                 <div id="dataDisplay" class="empty-content"></div>
             </div>
-            <h2 style="margin-bottom: 10px;">标准算法模型库结果显示</h2>
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <h2>标准算法模型库显示</h2>
+                <div class="tooltip-container" style="display: inline-block; margin-left: 10px;margin-top: -20px;">
+                    <span class="tooltip-icon" style="cursor: pointer; background-color: #1890ff; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; line-height: 20px;">?</span>
+                    <div class="tooltip-text" style="display: none; position: fixed; background: #fff; border: 1px solid #ddd; padding: 3px; border-radius: 4px; width: 300px; z-index: 1; box-shadow:  rgba(0,0,0,0.1);">
+                        标准算法（算子）模型库在地面高性能通用平台上的运算结果
+                    </div>
+                </div>
+            </div>
             <div class="panel-content" style="margin-bottom: 20px;">
                 <div id="highResultDisplay" class="empty-content"></div>
             </div>
-            <h2 style="margin-bottom: 10px;">机载移植算法模型库结果显示</h2>
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <h2>机载移植算法模型库结果显示</h2>
+                <div class="tooltip-container" style="display: inline-block; margin-left: 10px;margin-top: -20px;">
+                    <span class="tooltip-icon" style="cursor: pointer; background-color: #1890ff; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; z-index: 1000;align-items: center; justify-content: center; font-size: 12px; line-height: 20px; vertical-align: middle;">?</span>
+                    <div class="tooltip-text" style="display: none; position: fixed; background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 4px; width: 300px; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        机载算法（算子）模型库在机载嵌入式智能平台上的运算结果
+                    </div>
+                </div>
+            </div>
             <div class="panel-content" style="margin-bottom: 20px;">
                 <div id="AIDisplay" class="empty-content"></div>
             </div>
-            <h2 style="margin-bottom: 10px;">精度比对结果显示</h2>
+            <h2 style="margin-bottom: 10px;">比对结果显示</h2>
             <div class="panel-content" style="margin-bottom: 20px;">
                 <div id="compareDisplay" class="empty-content"></div>
             </div>
@@ -428,6 +536,23 @@
             <h2>模型显示</h2>
             <div class="panel-content">
                 <div id="model-display" class="empty-content"></div>
+            </div>
+            <div class="section">
+                <h2>推理速度结果</h2>
+                <div class="results-preview">
+                    <div class="result-preview-box">
+                        <div class="preview-label">
+                            <span>通用平台结果</span>
+                        </div>
+                        <textarea id="general-speed-result" class="preview-content" readonly></textarea>
+                    </div>
+                    <div class="result-preview-box">
+                        <div class="preview-label">
+                            <span>机载嵌入式智能平台结果</span>
+                        </div>
+                        <textarea id="embedded-speed-result" class="preview-content" readonly></textarea>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -445,6 +570,5 @@
         });
     </script>
     <script src="script.js"></script>
-    
 </body>
 </html>

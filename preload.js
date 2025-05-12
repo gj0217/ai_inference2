@@ -39,7 +39,34 @@ try {
         readFile: async (filePath) => await ipcRenderer.invoke('read-file', filePath),
         joinPath: (...args) => path.join(...args),
         getAppPath: () => __dirname,
-        saveImg: async (imgPath, fileName) => await ipcRenderer.invoke('save-img', { imgPath, fileName })
+        saveImg: async (imgPath, fileName) => await ipcRenderer.invoke('save-img', { imgPath, fileName }),
+        deleteFile: async (filePath) => await ipcRenderer.invoke('delete-file', filePath),
+        getTxtFiles: async (folderPath) => {
+          try {
+              const files = await fs.readdir(folderPath);  // 修改这里，移除.promises
+              return files
+                  .filter(file => file.endsWith('.txt'))
+                  .map(file => ({
+                      name: file,
+                      path: path.join(folderPath, file)
+                  }));
+          } catch (error) {
+              console.error('获取txt文件失败:', error);
+              return [];
+          }
+        },
+        showDialog: async (options) => {
+            return await ipcRenderer.invoke('show-dialog', {
+                ...options,
+                type: 'create'
+            });
+        },
+        updateDialog: async (options) => {
+            return await ipcRenderer.invoke('show-dialog', {
+                ...options,
+                type: 'update'
+            });
+        }
     });
     console.log('APIs exposed successfully');
 } catch (error) {

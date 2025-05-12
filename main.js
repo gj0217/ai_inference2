@@ -78,7 +78,6 @@ ipcMain.handle('select-file-only', async (event, options) => {
 });
 
 // page_1处理文件选择
-// ... existing code ...
 ipcMain.handle('select-file1', async (event, options) => {
   console.log('select-file1 接收到的 options:', options);
   const framework = options.framework; // 从渲染进程获取框架类型
@@ -216,4 +215,70 @@ try {
   console.error('Failed to load local service:', error);
   throw error;
 }
+});
+
+ipcMain.handle('delete-file', async (event, filePath) => {
+  try {
+    await fs.unlink(filePath);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// 添加对话框引用存储
+let dialogWindow = null;
+
+ipcMain.handle('show-dialog', async (event, options) => {
+    
+    if (options.type === 'create') {
+        if (dialogWindow && !dialogWindow.isDestroyed()) {
+            dialogWindow.close();
+        }
+        
+        dialogWindow = new BrowserWindow({
+            width: options.width || 800,
+            height: options.height || 600,
+            webPreferences: {
+                nodeIntegration: true,
+                contextIsolation: false
+            },
+            show: false
+        });
+        
+        dialogWindow.on('closed', () => {
+            dialogWindow = null;
+        });
+        
+        await dialogWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>${options.title || 'Dialog'}</title>
+                <style>
+                    body { 
+                        padding: 20px; 
+                        white-space: pre-wrap;
+                        overflow: auto;
+                        font-family: monospace;
+                        background-color: white;
+                        color: black;
+                    }
+                </style>
+            </head>
+            <body>${options.message || ''}</body>
+            </html>
+        `)}`);
+        
+        dialogWindow.show();
+    } 
+    else if (options.type === 'update' && dialogWindow && !dialogWindow.isDestroyed()) {
+        await dialogWindow.webContents.executeJavaScript(`
+            document.body.innerHTML = ${JSON.stringify(options.message || '')};
+            document.title = ${JSON.stringify(options.title || 'Dialog')};
+            window.scrollTo(0, document.body.scrollHeight);
+        `);
+    }
+    
+    return true;
 });
