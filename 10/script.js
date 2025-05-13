@@ -5,16 +5,18 @@ const frameworkRadios = document.querySelectorAll('input[name="framework"]');
 const inputShapeSelect = document.getElementById('inputShape');
 const logOutput = document.getElementById('logOutput');
 const modelDisplay = document.getElementById('model-display');
-const modelPathInput = document.getElementById('modelPath');
+const modelPathInput = document.getElementById('model_path');
 const exportPathInput = document.getElementById('exportPath');
 
 // 存储选择的选项
 const selectedFiles = {
+    type: "atlas",
     model_path: "",
     result_dir_path: "",
     fusion_switch_file: "",
     buffer_optimize: "",
-    algorithm: "",
+    optimization_level: "",
+    simplify: "",
 };
 
 // 新增：芯片类型动态渲染配置区
@@ -27,16 +29,36 @@ function renderChipConfigArea() {
     // 修改后的下拉框内容
     const selectHtml = '<select><option value="" selected></option><option value="fusion_on_on.config">fusion_on_on.config</option><option value="fusion_off_off.config">fusion_off_off.config</option></select>';
     const cacheSelectHtml = '<select><option value="" selected></option><option value="off_optimize">off_optimize</option><option value="l2_optimize">l2_optimize</option></select>';
+    const rkSelectHtml = '<select><option value="" selected></option><option value=0>0</option><option value=1>1</option><option value=2>2</option><option value=3>3</option></select>';
+    const tszkSelectHtml = '<select><option value="" selected></option><option value=0>0</option><option value=1>1</option></select>';
     if (selected === 'atlas') {
         area.innerHTML = `
             <div class="config-grid">
                 <div class="config-item">
-                    <label>模型精度：</label>
+                    <label>图优化：</label>
                     ${selectHtml.replace('<select>', '<select id="optimize310b" onchange="selectedFiles.fusion_switch_file = this.value">')}
                 </div>
                 <div class="config-item">
-                    <label>接口优化：</label>
+                    <label>缓存优化：</label>
                     ${cacheSelectHtml.replace('<select>', '<select id="cache310b" onchange="selectedFiles.buffer_optimize = this.value">')}
+                </div>
+            </div>
+        `;
+    } else if (selected === 'rk3588') {
+        area.innerHTML = `
+            <div class="config-grid">
+                <div class="config-item">
+                    <label>模型优化：</label>
+                    ${rkSelectHtml.replace('<select>', '<select id="modelopt3588" onchange="selectedFiles.optimization_level = this.value">')}
+                </div>
+            </div>
+        `;
+    } else if (selected === 'zk100') {
+        area.innerHTML = `
+            <div class="config-grid">
+                <div class="config-item">
+                    <label>模型优化：</label>
+                    ${tszkSelectHtml.replace('<select>', '<select id="modelopttszk" onchange="selectedFiles.simplify = this.value">')}
                 </div>
             </div>
         `;
@@ -79,18 +101,14 @@ frameworkRadios.forEach(radio => {
 });
 
 // 修改文件选择函数
-window.selectFile = function(type) {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.onchange = e => {
-        const file = e.target.files[0];
-        if (file) {
-            const pathInput = document.getElementById('modelPath'); // Fixed: added quotes around modelPath
-            pathInput.value = file.path;
-            selectedFiles.model_path = file.path;
-        }
-    };
-    input.click();
+window.selectFileOnly = async function(type,extension) {
+    const paths = await window.parent.electron.selectFileOnly({ extension });
+    const pathInput = document.getElementById(`${type}`);
+    if (paths && paths.length > 0) {
+        const filePath = paths[0];
+        pathInput.value = filePath;
+        selectedFiles[type] = filePath;
+    }
 };
 
 // 选择文件夹
@@ -112,25 +130,31 @@ window.deployModel = async function() {
     try {
         const config1 = {
             task_type : "convert",
-            device : "atlas",
+            device : selectedFiles.type,
             log : "/home/lenovo/proj/demo/log.txt",
             model_path: selectedFiles.model_path,
             result_dir_path : selectedFiles.result_dir_path,
             netron_display: 1,
-            port: 8090,
+            port: 8088,
             timeout: 20
         };
 
         // 添加非空参数
+        if (selectedFiles.optimization_level) {
+            config1.optimization_level = selectedFiles.optimization_level;
+        }
         if (selectedFiles.fusion_switch_file) {
             config1.fusion_switch_file = selectedFiles.fusion_switch_file;
         }
         if (selectedFiles.buffer_optimize) {
             config1.buffer_optimize = selectedFiles.buffer_optimize;
         }
+        if (selectedFiles.simplify) {
+            config1.simplify = selectedFiles.simplify;
+        }
 
         // 保存配置文件
-        const savedPath = await window.parent.electron.saveJson(config1, `convert_${selectedFiles.algorithm}.json`);
+        const savedPath = await window.parent.electron.saveJson(config1, `convert_${selectedFiles.type}.json`);
         console.log('配置文件已保存到:', savedPath);
         const config2 = {
             task_jsons: [
@@ -139,7 +163,7 @@ window.deployModel = async function() {
         };
 
         // 保存配置文件
-        const savePath2 = await window.parent.electron.saveJson(config2, `page10_convert_${selectedFiles.algorithm}.json`);
+        const savePath2 = await window.parent.electron.saveJson(config2, `page10_convert_${selectedFiles.type}.json`);
         console.log('配置文件已保存到:', savePath2);
 
         // 显示正在启动服务的提示
@@ -163,7 +187,7 @@ window.deployModel = async function() {
         const command0 = 'rm /home/lenovo/proj/demo/log.txt';
         await window.parent.electron.executeCommand(command0);
         // 执行命令行命令
-        const command = `python3 ../python_scripts/run_tasks.py --json ${savePath2}`;
+        const command = `python3 /home/lenovo/proj/demo/python_scripts/run_tasks.py --json ${savePath2}`;
         console.log('执行命令:', command);
         
         // 执行命令并等待结果
@@ -175,7 +199,7 @@ window.deployModel = async function() {
         }
 
         // 等待并检查服务是否可用
-        const isServiceAvailable = await checkServiceAvailability('http://localhost:8090');
+        const isServiceAvailable = await checkServiceAvailability('http://localhost:8088');
         if (!isServiceAvailable) {
             throw new Error('服务启动失败，请检查 Python 服务是否正常运行');
         }
@@ -183,47 +207,45 @@ window.deployModel = async function() {
         modelDisplay.innerHTML = `
             <div style="position: relative;">
                 <iframe 
-                    src="http://localhost:8090" 
-                    style="width: 100%; height: 300px; border: none;"
+                    src="http://localhost:8088" 
+                    style="width: 100%; height: 600px; border: none;"
                     title="Model Visualization"
                     sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
                 ></iframe>
                 <button 
                     style="position: absolute; top: 10px; right: 10px; padding: 5px 10px; background-color: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer;"
-                    onclick="window.open('http://localhost:8090', '_blank', 'width=1200,height=800')"
+                    onclick="window.open('http://localhost:8088', '_blank', 'width=1200,height=800')"
                 >
                     全屏查看
                 </button>
             </div>
         `;
         // 持续尝试读取日志文件，直到成功
-        let logContent = '';
-        while (!logContent) {
+        // 设置10分钟内定期获取日志
+        const endTime = Date.now() + 10 * 60 * 1000; // 10分钟
+        const fetchLog = async () => {
+            if (Date.now() > endTime) return;
+            
             try {
-                logContent = await window.parent.electron.readFile(config1.log);
-                if (!logContent) {
-                    await new Promise(resolve => setTimeout(resolve, 5000)); // 等待5秒
-                }
+                const logContent = await window.parent.electron.readFile(config1.log);
+                logOutput.textContent = logContent;
+                logOutput.className = 'result-content';
             } catch (error) {
-                await new Promise(resolve => setTimeout(resolve, 5000)); // 等待5秒
+                console.error('获取日志失败:', error);
             }
-        }
-
-        logOutput.textContent = logContent;
-        logOutput.className = 'result-content';
+            
+            setTimeout(fetchLog, 5000); // 每5秒获取一次
+        };
+        
+        fetchLog(); // 开始获取日志
 
 
     } catch (error) {
         console.error('服务启动错误:', error);
-        modelResult.className = 'result-content';
-        modelResult.textContent = '解析失败:\n' + error.message;
-        showError(error.message, modelDisplay);
+        logOutput.className = 'result-content';
+        logOutput.textContent = '解析失败:\n' + error.message;
+        showError(error.message, logOutput);
     }
-}
-
-// 生成随机ID
-function getRandomId() {
-    return Math.random().toString(36).substring(2, 12);
 }
 
 // 检查服务是否可用的函数

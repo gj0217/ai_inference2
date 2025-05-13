@@ -1,6 +1,0 @@
-{
-    "id": "7",
-    "func": "1",
-    "model_path": "./sys2/exported/resnet50.onnx",
-    "export_path": "./exported/"
-}

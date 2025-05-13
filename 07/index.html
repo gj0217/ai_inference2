@@ -20,6 +20,7 @@
         }
         .control-panel {
             width: 320px;
+            min-height: 700px;  /* 使用最小高度 */
             background: white;
             padding: 24px;
             border-radius: 12px;
@@ -86,8 +87,7 @@
         }
         .algo-display-section {
             margin-top: 24px;
-            margin-bottom: 10px;
-            height: 55%; /* 固定高度 */
+            height: 54%; /* 固定高度 */
             width: 100%; /* 固定宽度 */
             overflow: auto; /* 允许内容滑动 */
             resize: none; /* 禁止用户调整大小 */
@@ -115,7 +115,7 @@
         }
         .text-display {
             border: 1px solid #e0e0e0;
-            height: 180px; /* 固定高度 */
+            height: 230px; /* 固定高度 */
             width: 95%; /* 固定宽度 */
             padding: 16px;
             background-color: #fafafa;
@@ -206,7 +206,6 @@
             display: flex;
             justify-content: space-between;
             gap: 12px;
-            margin-top: 24px;
         }
         .button-group button {
             flex: 1;
@@ -284,13 +283,12 @@
     </div>
     <div class="container">
         <div class="control-panel">
-            <div class="form-group">
+                <div class="display-title">算法路径</div>
                 <div class="path-input">
                     <input type="text" id="model_path" readonly placeholder="算法路径：" value="./sys2/exported/resnet50.onnx">
                     <button onclick="selectFileOnly('model_path','onnx')">选择</button>
                 </div>
-            </div>
-   
+            <div class="display-title">结果输出路径</div>
                 <div class="path-input">
                     <input type="text" id="export_path" readonly placeholder="结果输出路径：" value="./exported/">
                     <button onclick="selectFolder('export_path')">选择</button>

@@ -304,7 +304,7 @@
 </head>
 <body>
     <div class="header">
-        <h1 class="title">算法接口转换开发支持工具</h1>
+        <h1 class="title">基础运算开发支持工具</h1>
         <img src="logo.png" alt="Logo" class="logo">
     </div>
     <div class="container">
@@ -321,8 +321,8 @@
 
             <div class="form-section">
                 <div class="path-input">
-                    <input type="text" id="modelPath" accept=".onnx" readonly placeholder="算法模型路径：">
-                    <button onclick="selectFile()">选择</button>                
+                    <input type="text" id="model_path" accept=".onnx" readonly placeholder=算法模型路径：">
+                    <button onclick="selectFileOnly('model_path','onnx')">选择</button>                
                 </div>
                 <div class="path-input">
                     <input type="text" id="exportPath" readonly placeholder="接口转换结果路径：">
@@ -335,13 +335,13 @@
                 <div id="chip-config-area"></div>
             </div>
 
-            <button class="analyze-btn" onclick="deployModel()">模型部署</button>
+            <button class="analyze-btn" onclick="deployModel()">算法转换</button>
         </div>
 
         <div class="center-panel">
             <h2>算法显示</h2>
             <div class="panel-content">
-                <div id="model-display" class="empty-content">点击"模型解析"按钮查看模型结构图</div>
+                <div id="model-display" class="empty-content">点击"算法转换"按钮查看模型结构图</div>
             </div>
         </div>
 
@@ -355,4 +355,4 @@
 
     <script src="script.js"></script>
 </body>
-</html>
+</html> 
