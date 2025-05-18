@@ -27,17 +27,17 @@ function renderChipConfigArea() {
     selectedFiles.type = selected; // 将选中的芯片类型更新到selectedFiles中
     const area = document.getElementById('chip-config-area');
     // 修改后的下拉框内容
-    const selectHtml = '<select><option value="" selected></option><option value="FP32">FP32</option><option value="FP16">FP16</option></select>';
+    const selectHtml = '<select><option value="" selected></option><option value="fusion_on_on.config">fusion_on_on.config</option><option value="fusion_off_off.config">fusion_off_off.config</option></select>';
     const cacheSelectHtml = '<select><option value="" selected></option><option value="off_optimize">off_optimize</option><option value="l2_optimize">l2_optimize</option></select>';
     if (selected === 'atlas') {
         area.innerHTML = `
             <div class="config-grid">
                 <div class="config-item">
-                    <label>算法精度：</label>
+                    <label>图优化：</label>
                     ${selectHtml.replace('<select>', '<select id="optimize310b" onchange="selectedFiles.fusion_switch_file = this.value">')}
                 </div>
                 <div class="config-item">
-                    <label>算法优化：</label>
+                    <label>缓存优化：</label>
                     ${cacheSelectHtml.replace('<select>', '<select id="cache310b" onchange="selectedFiles.buffer_optimize = this.value">')}
                 </div>
             </div>

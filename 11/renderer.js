@@ -163,7 +163,7 @@ window.serverInference = async function() {
         console.log('配置文件已保存到:', savedPath);
 
         // 执行命令行命令
-        const command = `python /home/lenovo/桌面/proj/backend/main.py -c ./configs/${randomId}.json -i ${randomId} -p 8080`;
+        const command = `conda run -n env python /home/lenovo/桌面/proj/backend/main.py -c ./configs/${randomId}.json -i ${randomId} -p 8080`;
         console.log('执行命令:', command);
         await window.parent.electron.executeCommand(command);
         // sleep 5s
@@ -224,18 +224,15 @@ window.deviceInference = async function() {
         await window.parent.electron.saveJson(config, `${randomId}.json`);
         console.log('配置文件已更新');
         // 执行命令行命令
-        const command = `python3 /home/lenovo/proj/demo/python_scripts/run_tasks.py --json ./configs/${randomId}.json --mapping`;
+        const command = `conda run -n env python3 /home/lenovo/proj/demo/python_scripts/run_tasks.py --json ./configs/${randomId}.json --mapping`;
         console.log('执行命令:', command);
         await window.parent.electron.executeCommand(command);
 
         aiResult.className = 'result-content';
         if (selectedFiles.task === 'classification') {
-            // sleep 5s,todo: 可能需要改时间
-            await new Promise(resolve => setTimeout(resolve, 5000));
             const endTime = Date.now() + 10 * 60 * 1000; // 10分钟超时
             while (Date.now() <= endTime) {
                 try {
-                    //todo: 改路径
                     const logContent = await window.parent.electron.readFile(selectedFiles.result_path+'/result.txt');
                     if (logContent && logContent.trim()) {
                         aiResult.textContent = logContent;
@@ -262,11 +259,11 @@ window.deviceInference = async function() {
                 await new Promise(resolve => setTimeout(resolve, 5000)); // 等待5秒
             }
         }
-        //todo: 改路径
         const delayPath = window.parent.electron.joinPath(selectedFiles.result_path, `delay.txt`);
         // 在embedded-speed-result显示delayPath的内容
         const delayContent = await window.parent.electron.readFile(delayPath);
-        document.getElementById('embedded-speed-result').textContent = delayContent;
+        embeddedSpeedResult = document.getElementById('embedded-speed-result');
+        embeddedSpeedResult.textContent = delayContent;
         
         // 并加入历史记录
         addHistoryRecord({

@@ -66,25 +66,7 @@ function showError(message, modelDisplay) {
     `;
 }
 
-// 添加清空展示框的函数
-function clearDisplays() {
-    const displays = [
-        document.getElementById('model-function-display'),
-        document.getElementById('basic-operations-display'),
-        document.querySelector('.model-display')
-    ];
-    
-    displays.forEach(display => {
-        if (display) {
-            display.textContent = '';
-            display.innerHTML = '';
-        }
-    });
-}
-
-// 在按钮点击事件中调用
 window.parseModelFunction = async function() {
-    clearDisplays();  // 先清空展示框
     console.log('parseModelFunction');
     const modelResult = document.getElementById('model-function-display');
     const modelDisplay = document.querySelector('.model-display');
@@ -118,22 +100,8 @@ window.parseModelFunction = async function() {
             </div>
         `;
 
-        let port = 4041;
-        let isPortAvailable = false;
-        while (!isPortAvailable && port < 4100) {
-            isPortAvailable = await checkPortAvailability(port);
-            if (!isPortAvailable) {
-                console.log(`端口 ${port} 被占用，尝试下一个端口`);
-                port++;
-            }
-        }
-
-        if (!isPortAvailable) {
-            throw new Error('没有找到可用端口(3031-3100)');
-        }
-
         // 执行命令行命令
-        const command = `python /home/lenovo/桌面/proj/backend/main.py -c ./configs/${randomId}.json -i ${randomId} -p ${port}`;
+        const command = `conda run -n env python /home/lenovo/桌面/proj/backend/main.py -c ./configs/${randomId}.json -i ${randomId} -p 8085`;
         console.log('执行命令:', command);
         
         // 执行命令并等待结果
@@ -145,7 +113,7 @@ window.parseModelFunction = async function() {
         }
         
         // 等待并检查服务是否可用
-        const isServiceAvailable = await checkServiceAvailability(`http://localhost:${port}`);
+        const isServiceAvailable = await checkServiceAvailability('http://localhost:8085');
         if (!isServiceAvailable) {
             throw new Error('服务启动失败，请检查 Python 服务是否正常运行');
         }
@@ -154,14 +122,14 @@ window.parseModelFunction = async function() {
         modelDisplay.innerHTML = `
             <div style="position: relative;">
                 <iframe 
-                    src="http://localhost:${port}" 
+                    src="http://localhost:8085" 
                     style="width: 100%; height: 300px; border: none;"
                     title="Model Visualization"
                     sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
                 ></iframe>
                 <button 
                     style="position: absolute; top: 10px; right: 10px; padding: 5px 10px; background-color: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer;"
-                    onclick="window.open('http://localhost:${port}', '_blank', 'width=1200,height=800')"
+                    onclick="window.open('http://localhost:8085', '_blank', 'width=1200,height=800')"
                 >
                     全屏查看
                 </button>
@@ -182,7 +150,6 @@ window.parseModelFunction = async function() {
 }
 
 window.parseBasicOperations = async function() {
-    clearDisplays();  // 先清空展示框
     console.log('parseBasicOperations');
     const operationResult = document.getElementById('basic-operations-display');
     const modelDisplay = document.querySelector('.model-display');
@@ -200,7 +167,7 @@ window.parseBasicOperations = async function() {
         console.log('配置文件已保存到:', savedPath);
 
         // 执行命令行命令
-        const command = `python /home/lenovo/桌面/proj/backend/main.py -c ./configs/${randomId}.json -i ${randomId} -p 8085`;
+        const command = `conda run -n env python /home/lenovo/桌面/proj/backend/main.py -c ./configs/${randomId}.json -i ${randomId} -p 8085`;
         console.log('执行命令:', command);
         
         // 显示正在启动服务的提示

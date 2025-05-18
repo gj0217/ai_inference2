@@ -132,7 +132,7 @@ window.supportList = async function() {
         console.log('配置文件已保存到:', savedPath);
 
          // 执行命令行命令
-         const command = `python /home/lenovo/桌面/proj/backend/main.py -c ./configs/${randomId}.json -i ${randomId} -p 8092`;
+         const command = `conda run -n env python /home/lenovo/桌面/proj/backend/main.py -c ./configs/${randomId}.json -i ${randomId} -p 8092`;
          console.log('执行命令:', command);
          const result = await window.parent.electron.executeCommand(command);
          console.log('命令执行结果:', result);
@@ -193,7 +193,7 @@ window.AIInference = async function() {
     </div>
 `;
     // 执行命令行命令
-    const command = `python /home/lenovo/桌面/proj/backend/main.py -c ./configs/${randomId}.json -i ${randomId} -p 8092`;
+    const command = `conda run -n env python /home/lenovo/桌面/proj/backend/main.py -c ./configs/${randomId}.json -i ${randomId} -p 8092`;
     console.log('执行命令:', command);
     const result = await window.parent.electron.executeCommand(command);
     console.log('命令执行结果:', result);
@@ -289,7 +289,7 @@ window.dataVerify = async function() {
     config.func = "3";  // 修改func字段
     await window.parent.electron.saveJson(config, `${randomId}.json`);
     // 执行命令行命令
-    const command = `python3 /home/lenovo/proj/demo/python_scripts/run_tasks.py --json ./configs/${randomId}.json --mapping`;
+    const command = `conda run -n base python3 /home/lenovo/proj/demo/python_scripts/run_tasks.py --json ./configs/${randomId}.json --mapping`;
     console.log('执行命令:', command);
     const result = await window.parent.electron.executeCommand(command);
     console.log('命令执行结果:', result);
